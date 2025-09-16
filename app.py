@@ -2,7 +2,7 @@ import telebot
 from google import genai
 import os
 
-client = genai.Client(api_key="AIzaSyA8LZw-piOZ8Du8ZOYmoxJEQmbvnIfmuKs")
+client = genai.Client(api_key=os.getenv("API_GEMINI"))
 
 system_prompt = """
 you are a helpful assistant that translates Inglish to French"""
