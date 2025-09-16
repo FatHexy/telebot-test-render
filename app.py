@@ -1,5 +1,6 @@
 import telebot
 from google import genai
+import os
 
 client = genai.Client(api_key="AIzaSyA8LZw-piOZ8Du8ZOYmoxJEQmbvnIfmuKs")
 
@@ -9,7 +10,7 @@ you are a helpful assistant that translates Inglish to French"""
 
 # --- IMPORTANT ---
 # Replace 'YOUR_API_TOKEN' with the token you got from @BotFather
-API_TOKEN = '8106863748:AAHluHTF75B0i_DpXtRJuiFKvSv3xATY7Q0'
+API_TOKEN = os.getenv("TELEBOT_TOKEN")
 # -----------------
 
 # Create a new bot instance
