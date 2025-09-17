@@ -1,53 +1,32 @@
-import telebot
-from google import genai
+# In a file like api/index.py
+
 import os
+import telebot
+from flask import Flask, request
 
-client = genai.Client(api_key=os.getenv("API_GEMINI"))
+# --- Configuration ---
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
+bot = telebot.TeleBot(BOT_TOKEN)
+app = Flask(__name__)
 
-system_prompt = """
-you are a helpful assistant that translates Inglish to French"""
+# --- Bot Logic ---
+# This is the endpoint Telegram will send updates to
+@app.route(f'/{BOT_TOKEN}', methods=['POST'])
+def webhook():
+    if request.headers.get('content-type') == 'application/json':
+        json_string = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return 'OK', 200
+    else:
+        return 'Bad Request', 400
 
-
-# --- IMPORTANT ---
-# Replace 'YOUR_API_TOKEN' with the token you got from @BotFather
-API_TOKEN = os.getenv("TELEBOT_TOKEN")
-# -----------------
-
-# Create a new bot instance
-bot = telebot.TeleBot(API_TOKEN)
-
-# --- Message Handlers ---
-
-# Handler for the /start and /help commands
-@bot.message_handler(commands=['start', 'help'])
+# Simple start handler
+@bot.message_handler(commands=['start'])
 def send_welcome(message):
-    """
-    This function sends a welcome message when the user sends /start or /help.
-    """
-    bot.reply_to(message, "Howdy, how are you doing? I am an echo bot. Just send me any message, and I will repeat it back to you!")
+    bot.reply_to(message, "Hello from Vercel! I am a webhook-powered bot.")
 
-# Handler for all other text messages
+# A simple echo handler
 @bot.message_handler(func=lambda message: True)
-def echo_all(message):
-    """
-    This function echoes any text message that is not a command.
-    """
-    # The bot replies to the user's message with the exact same text.
-    user_prompt = message.text
-    
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=[system_prompt, user_prompt]
-    )
-    
-    bot.reply_to(message, response.text)
-
-
-# --- Main execution ---
-
-if __name__ == '__main__':
-    print("Bot is starting...")
-    # Start the bot. This function blocks the script until you stop it.
-    # It continuously asks Telegram for new messages.
-    # none_stop=True makes it retry even if it fails.
-    bot.infinity_polling()
+def echo_message(message):
+    bot.reply_to(message, message.text)
